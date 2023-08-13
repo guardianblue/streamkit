@@ -9,10 +9,12 @@
 
 // add headers that you want to pre-compile here
 #include "framework.h"
+#include <vector>
 #include "websocketpp/server.hpp"
 #include "websocketpp/config/asio_no_tls.hpp"
 #include "MinHook.h"
 #include "boost/locale.hpp"
+#include "boost/algorithm/string.hpp"
 #include "Psapi.h"
 
 #endif //PCH_H
