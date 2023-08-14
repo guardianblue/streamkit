@@ -55,9 +55,9 @@ void SceneDecider::updateTicker(string ticker)
 	else if (this->scene == Scene::IIDX_SP_STAGE) {
 		string suffix = ticker.substr(this->song.length());
 
-		cout << "[StreamKit] Stage end: " << suffix << endl;
+		LOG_INFO << "Stage end: " << suffix << endl;
 
-		if (suffix.compare(" FAILED..") == 0 || suffix.compare(" CLEAR!") == 0) {
+		if (suffix.compare(MUSIC_CLEAR_SUFFIX) == 0 || suffix.compare(MUSIC_FAIL_SUFFIX) == 0) {
 			nextScene = Scene::IIDX_RESULT;
 		}
 	}
@@ -71,7 +71,7 @@ void SceneDecider::updateTicker(string ticker)
 	}
 
 	if (nextScene != Scene::UNKNOWN && nextScene != this->scene) {
-		std::cout << "[StreamKit] Scene Change: " << getSceneName(this->scene) << " > " << getSceneName(nextScene) << std::endl;
+		LOG_INFO << "Scene Change: " << getSceneName(this->scene) << " > " << getSceneName(nextScene) << std::endl;
 		this->scene = nextScene;
 
 		// TODO: use websocket to update OBS scene

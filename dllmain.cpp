@@ -2,19 +2,14 @@
 #include "pch.h"
 #include "SceneDecider.h"
 
-#if _WIN64
-#pragma comment(lib, "minhook.x64.lib")
-#else
-#pragma comment(lib, "minhook.x86.lib")
-#endif
-
 SceneDecider sceneDecider;
+Logger logger;
 
 void TickerOut(uintptr_t tickerText)
 {
     if (strcmp((char*)tickerText, "         ") != 0)
     {
-        std::cout << "Ticker: " << (char*)tickerText << std::endl;
+        LOG_INFO << "Ticker: " << (char*)tickerText << std::endl;
         sceneDecider.updateTicker((char*)tickerText);
     }
 }
@@ -194,7 +189,7 @@ void HookDllType(MODULEINFO moduleInfo)
     BYTE* addrLow = static_cast<BYTE*>(moduleInfo.lpBaseOfDll);
     BYTE* addrHigh = addrLow + moduleInfo.SizeOfImage;
 
-    std::cout << "Searching for hook points" << std::endl;
+    LOG_DEBUG << "Searching for hook points";
 
 #if _WIN64
     // 64bit hooks
@@ -202,7 +197,7 @@ void HookDllType(MODULEINFO moduleInfo)
     if (result != addrHigh)
     {
         hooksMade++;
-        std::cout << "Found TikcerFunc1 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc1 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc1_rep),
@@ -212,7 +207,7 @@ void HookDllType(MODULEINFO moduleInfo)
         if (result != addrHigh)
         {
             hooksMade++;
-            std::cout << "Found TikcerFunc1 at: " << std::hex << (uintptr_t)result << std::endl;
+            LOG_DEBUG << "Found TickerFunc1 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc1_rep),
@@ -224,7 +219,7 @@ void HookDllType(MODULEINFO moduleInfo)
     if (result != addrHigh)
     {
         hooksMade++;
-        std::cout << "Found TikcerFunc2 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc2 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc2_rep),
@@ -236,7 +231,7 @@ void HookDllType(MODULEINFO moduleInfo)
     if (result != addrHigh)
     {
         hooksMade++;
-        std::cout << "Found TikcerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc3_rep),
@@ -247,7 +242,7 @@ void HookDllType(MODULEINFO moduleInfo)
         if (result != addrHigh)
         {
             hooksMade++;
-            std::cout << "Found TikcerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
+            LOG_DEBUG << "Found TickerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc3_rep),
@@ -260,7 +255,7 @@ void HookDllType(MODULEINFO moduleInfo)
     if (result != addrHigh)
     {
         hooksMade++;
-        std::cout << "Found TikcerFunc4 at: " << std::hex << (uintptr_t)result << std::endl;
+        std::cout << "Found TickerFunc4 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc4_rep),
@@ -275,7 +270,7 @@ void HookDllType(MODULEINFO moduleInfo)
     {
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc1 at: " << std::hex << (uintptr_t)result << std::endl;
+        std::cout << "Found TickerFunc1 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc1_rep),
@@ -286,7 +281,7 @@ void HookDllType(MODULEINFO moduleInfo)
         {
             result += 0x1; // +1 because of the CC
             hooksMade++;
-            std::cout << "Found TikcerFunc1 at: " << std::hex << (uintptr_t)result << std::endl;
+            std::cout << "Found TickerFunc1 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc1_rep),
@@ -300,7 +295,7 @@ void HookDllType(MODULEINFO moduleInfo)
     {
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc2 at: " << std::hex << (uintptr_t)result << std::endl;
+        std::cout << "Found TickerFunc2 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc2_rep),
@@ -313,7 +308,7 @@ void HookDllType(MODULEINFO moduleInfo)
     {
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
+        std::cout << "Found TickerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc3_rep),
@@ -324,7 +319,7 @@ void HookDllType(MODULEINFO moduleInfo)
         {
             result += 0x1; // +1 because of the CC
             hooksMade++;
-            std::cout << "Found TikcerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
+            std::cout << "Found TickerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc3_rep),
@@ -338,7 +333,7 @@ void HookDllType(MODULEINFO moduleInfo)
     {
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc4 at: " << std::hex << (uintptr_t)result << std::endl;
+        std::cout << "Found TickerFunc4 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc4_rep),
@@ -351,7 +346,7 @@ void HookDllType(MODULEINFO moduleInfo)
     {
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc5 at: " << std::hex << (uintptr_t)result << std::endl;
+        std::cout << "Found TickerFunc5 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc5_rep),
@@ -359,7 +354,7 @@ void HookDllType(MODULEINFO moduleInfo)
         );
     }
 #endif
-    std::cout << "Hooked " << hooksMade << " functions" << std::endl;
+    LOG_INFO << "Hooked " << hooksMade << " functions" << std::endl;
 
     MH_EnableHook(MH_ALL_HOOKS);
 }
@@ -371,20 +366,20 @@ void HookExeType(MODULEINFO moduleInfo)
     int hooksMade = 0;
     bool found7 = false;
 
-    std::cout << "Module base address: " << moduleInfo.lpBaseOfDll << std::endl
+    LOG_DEBUG << "Module base address: " << moduleInfo.lpBaseOfDll << std::endl
         << "Module size: " << moduleInfo.SizeOfImage << " bytes" << std::endl;
 
     BYTE* addrLow = static_cast<BYTE*>(moduleInfo.lpBaseOfDll);
     BYTE* addrHigh = addrLow + moduleInfo.SizeOfImage;
 
-    std::cout << "Searching for hook points" << std::endl;
+    LOG_DEBUG << "Searching for hook points" << std::endl;
 
     BYTE* result = std::search(addrLow, addrHigh, TickerFunc3_vec.begin(), TickerFunc3_vec.end());
     if (result != addrHigh)
     {
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc3_rep),
@@ -395,7 +390,7 @@ void HookExeType(MODULEINFO moduleInfo)
         {
             result += 0x1; // +1 because of the CC
             hooksMade++;
-            std::cout << "Found TikcerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
+            LOG_DEBUG << "Found TickerFunc3 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc3_rep),
@@ -409,7 +404,7 @@ void HookExeType(MODULEINFO moduleInfo)
     {
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc5 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc5 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc5_rep),
@@ -422,7 +417,7 @@ void HookExeType(MODULEINFO moduleInfo)
     {
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc6 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc6 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc6_rep),
@@ -433,7 +428,7 @@ void HookExeType(MODULEINFO moduleInfo)
         {
             result += 0x1; // +1 because of the CC
             hooksMade++;
-            std::cout << "Found TikcerFunc6 at: " << std::hex << (uintptr_t)result << std::endl;
+            LOG_DEBUG << "Found TickerFunc6 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc6_rep),
@@ -448,7 +443,7 @@ void HookExeType(MODULEINFO moduleInfo)
         found7 = true;
         result += 0x1; // +1 because of the CC
         hooksMade++;
-        std::cout << "Found TikcerFunc7 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc7 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc7_rep),
@@ -463,7 +458,7 @@ void HookExeType(MODULEINFO moduleInfo)
         {
             result -= 106; // align -106
             hooksMade++;
-            std::cout << "Found TikcerFunc8 at: " << std::hex << (uintptr_t)result << std::endl;
+            LOG_DEBUG << "Found TickerFunc8 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc8_rep),
@@ -475,7 +470,7 @@ void HookExeType(MODULEINFO moduleInfo)
     if (result != addrHigh)
     {
         hooksMade++;
-        std::cout << "Found TikcerFunc9 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc9 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc9_rep),
@@ -485,7 +480,7 @@ void HookExeType(MODULEINFO moduleInfo)
         if (result != addrHigh)
         {
             hooksMade++;
-            std::cout << "Found TikcerFunc9 at: " << std::hex << (uintptr_t)result << std::endl;
+            LOG_DEBUG << "Found TickerFunc9 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc9_rep),
@@ -499,7 +494,7 @@ void HookExeType(MODULEINFO moduleInfo)
     {
         result -= 68;
         hooksMade++;
-        std::cout << "Found TikcerFunc10 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc10 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc10_rep),
@@ -510,7 +505,7 @@ void HookExeType(MODULEINFO moduleInfo)
         {
             result -= 68;
             hooksMade++;
-            std::cout << "Found TikcerFunc10 at: " << std::hex << (uintptr_t)result << std::endl;
+            LOG_DEBUG << "Found TickerFunc10 at: " << std::hex << (uintptr_t)result << std::endl;
             MH_CreateHook(
                 reinterpret_cast<void*>((uintptr_t)result),
                 reinterpret_cast<void*>(TickerFunc10_rep),
@@ -523,7 +518,7 @@ void HookExeType(MODULEINFO moduleInfo)
     if (result != addrHigh)
     {
         hooksMade++;
-        std::cout << "Found TikcerFunc11 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc11 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc11_rep),
@@ -536,7 +531,7 @@ void HookExeType(MODULEINFO moduleInfo)
     {
         result -= 69;
         hooksMade++;
-        std::cout << "Found TikcerFunc12 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_DEBUG << "Found TickerFunc12 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc12_rep),
@@ -544,11 +539,12 @@ void HookExeType(MODULEINFO moduleInfo)
         );
     }
 
-    std::cout << "Hooked " << hooksMade << " functions" << std::endl;
+    LOG_INFO << "Hooked " << hooksMade << " functions" << std::endl;
 
     MH_EnableHook(MH_ALL_HOOKS);
 }
 #endif
+
 
 int DecideModule()
 {
@@ -578,7 +574,7 @@ DWORD WINAPI SearchAndHook(LPVOID hModule)
     switch (moduleType)
     {
     case 0:
-        std::cout << "No game module found." << std::endl;
+        LOG_ERROR << "No game module found." << std::endl;
         break;
     case 1:
         GetModuleInformation(GetCurrentProcess(), GetModuleHandleA("bm2dx.dll"), &moduleInfo, sizeof(moduleInfo));
@@ -613,6 +609,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 
         MH_Initialize();
+
+        Logger::init();
 
         CreateThread(NULL, NULL, SearchAndHook, hModule, NULL, NULL);
     }
