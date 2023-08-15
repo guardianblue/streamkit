@@ -1,15 +1,15 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
-#include "SceneDecider.h"
+#include "Decider.h"
 
-SceneDecider sceneDecider;
+Decider decider;
 Logger logger;
 
 void TickerOut(uintptr_t tickerText)
 {
     if (strcmp((char*)tickerText, "         ") != 0)
     {
-        sceneDecider.updateTicker((char*)tickerText);
+        decider.updateTicker((char*)tickerText);
     }
 }
 

@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "SceneDecider.h"
+#include "Decider.h"
 
 #include <boost/regex.hpp>
 
 using namespace std;
 using namespace boost::algorithm;
 
-SceneDecider::SceneDecider()
+Decider::Decider()
 {
 	this->scene = Scene::UNKNOWN;
 	this->ticker = "";
@@ -87,7 +87,7 @@ string getDanSong(string ticker) {
 	return "";
 }
 
-void SceneDecider::updateTicker(string ticker)
+void Decider::updateTicker(string ticker)
 {
 	Scene nextScene = Scene::UNKNOWN;
 

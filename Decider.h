@@ -14,7 +14,7 @@ enum class Scene {
 	SDVX_COURSE_RESULT
 };
 
-class SceneDecider
+class Decider
 {
 private:
 	std::string ticker;
@@ -23,7 +23,7 @@ private:
 	Scene scene;
 
 public:
-	SceneDecider();
+	Decider();
 	void updateTicker(std::string text);
 };
 
