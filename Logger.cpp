@@ -36,7 +36,7 @@ BOOST_LOG_GLOBAL_LOGGER_CTOR_ARGS(sysLogger,
 #define LOG_FORMATTER \
     expr::stream \
     << expr::format_date_time(expr::attr<boost::posix_time::ptime>("TimeStamp"), "%Y-%m-%d %H:%M:%S") \
-    << std::setw(6) << logging::trivial::severity \
+    << " " << std::left << std::setw(5) << logging::trivial::severity \
     << " [" << expr::attr<std::string>("File") \
     << ":" << expr::attr<int>("Line") << "] " \
     << expr::smessage

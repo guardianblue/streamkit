@@ -25,10 +25,9 @@ public:
     << boost::log::add_value("Line", __LINE__) \
     << boost::log::add_value("File", __FILE__)
 
-#define LOG_TRACE LOG_LOG_LOCATION(sysLogger::get(), trace)
 #define LOG_DEBUG LOG_LOG_LOCATION(sysLogger::get(), debug)
 #define LOG_INFO LOG_LOG_LOCATION(sysLogger::get(), info)
-#define LOG_WARN  LOG_LOG_LOCATION(sysLogger::get(), warning)
+#define LOG_WARN  LOG_LOG_LOCATION(sysLogger::get(), warn)
 #define LOG_ERROR LOG_LOG_LOCATION(sysLogger::get(), error)
 #define LOG_FATAL LOG_LOG_LOCATION(sysLogger::get(), fatal)
 

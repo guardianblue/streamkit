@@ -19,7 +19,7 @@ class SceneDecider
 private:
 	std::string ticker;
 	std::string song;
-
+	bool isArena;
 	Scene scene;
 
 public:

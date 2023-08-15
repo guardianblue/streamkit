@@ -9,7 +9,6 @@ void TickerOut(uintptr_t tickerText)
 {
     if (strcmp((char*)tickerText, "         ") != 0)
     {
-        LOG_INFO << "Ticker: " << (char*)tickerText << std::endl;
         sceneDecider.updateTicker((char*)tickerText);
     }
 }
