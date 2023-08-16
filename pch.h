@@ -13,8 +13,12 @@
 #include "framework.h"
 #include <vector>
 #include <iostream>
+#include <thread>
+#include <nlohmann/json.hpp>
+#include <websocketpp/client.hpp>
 #include <websocketpp/server.hpp>
 #include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/config/asio_no_tls_client.hpp>
 #include <minhook.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/locale.hpp>

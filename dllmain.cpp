@@ -1,6 +1,7 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include "Decider.h"
+#include "Notifier.h"
 
 Decider decider;
 Logger logger;
@@ -254,7 +255,7 @@ void HookDllType(MODULEINFO moduleInfo)
     if (result != addrHigh)
     {
         hooksMade++;
-        std::cout << "Found TickerFunc4 at: " << std::hex << (uintptr_t)result << std::endl;
+        LOG_INFO << "Found TickerFunc4 at: " << std::hex << (uintptr_t)result << std::endl;
         MH_CreateHook(
             reinterpret_cast<void*>((uintptr_t)result),
             reinterpret_cast<void*>(TickerFunc4_rep),
@@ -591,6 +592,8 @@ DWORD WINAPI SearchAndHook(LPVOID hModule)
 #endif
         break;
     }
+
+    wsConnect("ws://localhost:4455");
 
     return EXIT_SUCCESS;
 }
