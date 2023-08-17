@@ -9,21 +9,26 @@
 
 #define BOOST_USE_WINAPI_VERSION BOOST_WINAPI_VERSION_WIN7
 
-// add headers that you want to pre-compile here
 #include "framework.h"
-#include <vector>
+#include "Psapi.h"
+
 #include <iostream>
 #include <thread>
+#include <vector>
+
+#include <atlstr.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/locale.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <minhook.h>
 #include <nlohmann/json.hpp>
 #include <websocketpp/client.hpp>
 #include <websocketpp/server.hpp>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/config/asio_no_tls_client.hpp>
-#include <minhook.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/locale.hpp>
-#include "Psapi.h"
 
 #include "Logger.hpp"
+#include "Notifier.h"
 
 #endif //PCH_H

@@ -1,10 +1,10 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include "Decider.h"
-#include "Notifier.h"
 
 Decider decider;
 Logger logger;
+boost::property_tree::ptree ptree;
 
 void TickerOut(uintptr_t tickerText)
 {
@@ -563,7 +563,7 @@ int DecideModule()
     return 0;
 }
 
-DWORD WINAPI SearchAndHook(LPVOID hModule)
+DWORD WINAPI Initialize(LPVOID hModule)
 {
     unsigned int hooksMade = 0;
 
@@ -593,6 +593,22 @@ DWORD WINAPI SearchAndHook(LPVOID hModule)
         break;
     }
 
+    // Get path to ini file
+    LPWSTR path = new WCHAR[MAX_PATH];
+    GetModuleFileName((HMODULE)hModule, path, MAX_PATH);
+    string pathStr = string(CW2A(path));
+    pathStr.replace(pathStr.length() - 4, 4, ".ini");
+    LOG_DEBUG << "INI path: " << pathStr << endl;
+
+    try {
+        boost::property_tree::ini_parser::read_ini(pathStr, ptree);
+        decider.initSceneMap(ptree);
+    }
+    catch (std::exception& e) {
+        LOG_ERROR << "Cannot load INI file: " << e.what() << endl;
+    }
+
+    // Initialize WebSocket
     wsConnect("ws://localhost:4455");
 
     return EXIT_SUCCESS;
@@ -614,7 +630,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
         Logger::init();
 
-        CreateThread(NULL, NULL, SearchAndHook, hModule, NULL, NULL);
+        CreateThread(NULL, NULL, Initialize, hModule, NULL, NULL);
     }
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:

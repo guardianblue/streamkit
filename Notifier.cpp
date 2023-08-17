@@ -72,8 +72,10 @@ void sendMessage(string sceneName)
 {
 	if (isConnected)
 	{
-		if (sceneName != "")
+		if (sceneName.compare("") != 0)
 		{
+			LOG_DEBUG << "Sending scene change to OBS: " << sceneName << endl;
+
 			nlohmann::json js;
 			js["op"] = 6;
 

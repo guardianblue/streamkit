@@ -13,6 +13,29 @@ Decider::Decider()
 	this->song = "";
 }
 
+void Decider::initSceneMap(property_tree::ptree& ptree)
+{
+	this->sceneMap[Scene::TITLE] = ptree.get<string>("SCENE.title-screen");
+	this->sceneMap[Scene::CARD_IN] = ptree.get<string>("SCENE.card-in");
+	this->sceneMap[Scene::CARD_OUT] = ptree.get<string>("SCENE.card-out");
+	this->sceneMap[Scene::MODE_SELECT] = ptree.get<string>("SCENE.mode-select");
+
+	this->sceneMap[Scene::MUSIC_SELECT] = ptree.get<string>("SCENE.music-select");
+	this->sceneMap[Scene::STAGE] = ptree.get<string>("SCENE.stage");
+	this->sceneMap[Scene::RESULT] = ptree.get<string>("SCENE.result");
+
+	this->sceneMap[Scene::DAN_SELECT] = ptree.get<string>("SCENE.dan-select");
+	this->sceneMap[Scene::DAN_RESULT] = ptree.get<string>("SCENE.dan-result");
+
+	this->sceneMap[Scene::ARENA_LOBBY] = ptree.get<string>("SCENE.arena-lobby");
+	this->sceneMap[Scene::ARENA_BEFORE_SONG] = ptree.get<string>("SCENE.arena-before-song");
+	this->sceneMap[Scene::ARENA_PODIUM] = ptree.get<string>("SCENE.arena-podium");
+
+	this->sceneMap[Scene::BPL_LOBBY] = ptree.get<string>("SCENE.bpl-lobby");
+	this->sceneMap[Scene::BPL_BEFORE_SONG] = ptree.get<string>("SCENE.bpl-before-song");
+	this->sceneMap[Scene::BPL_PODIUM] = ptree.get<string>("SCENE.bpl-podium");
+}
+
 const string MUSIC_CLEAR_SUFFIX = " CLEAR!";
 const string MUSIC_FAIL_SUFFIX = " FAILED..";
 
@@ -22,30 +45,36 @@ std::string getSceneName(Scene scene)
 	case Scene::UNKNOWN:
 	default:
 		return "unknown";
-	case Scene::IIDX_TITLE:
+	case Scene::TITLE:
 		return "Title";
-	case Scene::IIDX_CARD_IN:
+	case Scene::CARD_IN:
 		return "Card In";
-	case Scene::IIDX_CARD_OUT:
+	case Scene::CARD_OUT:
 		return "Card Out";
-	case Scene::IIDX_MODE_SELECT:
+	case Scene::MODE_SELECT:
 		return "Mode Select";
-	case Scene::IIDX_MUSIC_SELECT:
+	case Scene::MUSIC_SELECT:
 		return "Music Select";
-	case Scene::IIDX_SP_STAGE:
-		return "SP Stage";
-	case Scene::IIDX_RESULT:
+	case Scene::STAGE:
+		return "Stage";
+	case Scene::RESULT:
 		return "Result";
-	case Scene::IIDX_DAN_SELECT:
+	case Scene::DAN_SELECT:
 		return "Dan Select";
-	case Scene::IIDX_DAN_RESULT:
+	case Scene::DAN_RESULT:
 		return "Dan Result";
-	case Scene::IIDX_ARENA_LOBBY:
+	case Scene::ARENA_LOBBY:
 		return "Arena Lobby";
-	case Scene::IIDX_ARENA_BEFORE_SONG:
+	case Scene::ARENA_BEFORE_SONG:
 		return "Arean Before Song";
-	case Scene::IIDX_ARENA_PODIUM:
+	case Scene::ARENA_PODIUM:
 		return "Arean Podium";
+	case Scene::BPL_LOBBY:
+		return "BPL Lobby";
+	case Scene::BPL_BEFORE_SONG:
+		return "BPL Before Song";
+	case Scene::BPL_PODIUM:
+		return "BPL Podium";
 	}
 }
 
@@ -87,6 +116,10 @@ string getDanSong(string ticker) {
 	return "";
 }
 
+/**
+* Determine the current scene based on 16-segment ticker content
+* https://note.com/rest_r2/n/n0a7595f86e90
+*/
 void Decider::updateTicker(string ticker)
 {
 	Scene nextScene = Scene::UNKNOWN;
@@ -99,54 +132,52 @@ void Decider::updateTicker(string ticker)
 		// Ignore
 	}
 	else if (boost::starts_with(ticker, "WELCOME TO BEATMANIA IIDX ")) {
-		nextScene = Scene::IIDX_TITLE;
+		nextScene = Scene::TITLE;
 	}
 	else if (ticker.compare("ENTRY") == 0) {
-		nextScene = Scene::IIDX_CARD_IN;
+		nextScene = Scene::CARD_IN;
 		this->isArena = false;
 	}
 	else if (ticker.compare("MODE?") == 0) {
-		nextScene = Scene::IIDX_MODE_SELECT;
+		nextScene = Scene::MODE_SELECT;
 	}
 	else if (ticker.compare("ARENA MATCHING") == 0) {
-		nextScene = Scene::IIDX_ARENA_LOBBY;
+		nextScene = Scene::ARENA_LOBBY;
 		this->isArena = true;
 	}
 	else if (ticker.compare("ARENA READY") == 0) {
-		nextScene = Scene::IIDX_ARENA_BEFORE_SONG;
+		nextScene = Scene::ARENA_BEFORE_SONG;
 	}
 	else if (ticker.compare("ARENA RESULT") == 0) {
-		nextScene = Scene::IIDX_ARENA_PODIUM;
+		nextScene = Scene::ARENA_PODIUM;
 	}
 	else if (ticker.compare("MUSIC SELECT!!") == 0) {
 		// Music select
-		nextScene = Scene::IIDX_MUSIC_SELECT;
+		nextScene = Scene::MUSIC_SELECT;
 	}
-	else if (this->scene != Scene::IIDX_MUSIC_SELECT && ticker.compare("THANK YOU FOR PLAYING!!") == 0) {
-		nextScene = Scene::IIDX_CARD_OUT;
+	else if (this->scene != Scene::MUSIC_SELECT && ticker.compare("THANK YOU FOR PLAYING!!") == 0) {
+		nextScene = Scene::CARD_OUT;
 	}
 	else if (isDanSelection(ticker) == true) {
-		nextScene = Scene::IIDX_DAN_SELECT;
+		nextScene = Scene::DAN_SELECT;
 	}
 	else if (ticker.compare("SUCCESS") == 0 || ticker.compare("UNSUCCESS") == 0) {
-		nextScene = Scene::IIDX_DAN_RESULT;
+		nextScene = Scene::DAN_RESULT;
 	}
-	else if (!this->isArena && this->scene == Scene::IIDX_MUSIC_SELECT) {
+	else if (!this->isArena && this->scene == Scene::MUSIC_SELECT) {
 		if (ticker.compare(this->ticker) == 0) {
 			// Ticker will send the same song name when a song is decided
-
-			// TODO: support DP
 			this->song = ticker;
-			nextScene = Scene::IIDX_SP_STAGE;
+			nextScene = Scene::STAGE;
 			LOG_INFO << "Stage start: " << this->song;
 		}
 	}
-	else if (this->isArena && this->scene == Scene::IIDX_ARENA_BEFORE_SONG) {
+	else if (this->isArena && this->scene == Scene::ARENA_BEFORE_SONG) {
 		this->song = ticker;
-		nextScene = Scene::IIDX_SP_STAGE;
+		nextScene = Scene::STAGE;
 		LOG_INFO << "Arena Stage start: " << this->song;
 	}
-	else if (this->scene == Scene::IIDX_SP_STAGE) {
+	else if (this->scene == Scene::STAGE) {
 		int tickerLength = ticker.length();
 		int songLength = this->song.length();
 		
@@ -154,7 +185,7 @@ void Decider::updateTicker(string ticker)
 			string suffix = ticker.substr(this->song.length());
 
 			if (boost::ends_with(ticker, MUSIC_CLEAR_SUFFIX) || boost::ends_with(ticker, MUSIC_FAIL_SUFFIX)) {
-				nextScene = Scene::IIDX_RESULT;
+				nextScene = Scene::RESULT;
 			}
 		}
 		catch (...) {
@@ -163,27 +194,35 @@ void Decider::updateTicker(string ticker)
 	}
 	else if (ticker.compare(this->ticker.append(MUSIC_CLEAR_SUFFIX)) == 0 || ticker.compare(this->ticker.append(MUSIC_FAIL_SUFFIX)) == 0)
 	{
-		nextScene = Scene::IIDX_RESULT;
+		nextScene = Scene::RESULT;
 	}
-	else if (this->scene == Scene::IIDX_RESULT && ticker.compare(this->song) == 0) {
+	else if (this->scene == Scene::RESULT && ticker.compare(this->song) == 0) {
 		// Quick restart from result
-		nextScene = Scene::IIDX_SP_STAGE;
+		nextScene = Scene::STAGE;
 	}
 	else {
 		string danSong = getDanSong(ticker);
 		if (danSong.length() > 0) {
-			nextScene = Scene::IIDX_SP_STAGE;
+			nextScene = Scene::STAGE;
 			this->song = getDanSong(ticker);
 			LOG_INFO << "Dan stage start: " << this->song;
 		}
 	}
 
+	this->ticker = ticker;
+
 	if (nextScene != Scene::UNKNOWN && nextScene != this->scene) {
-		LOG_INFO << "Scene Change: " << getSceneName(this->scene) << " > " << getSceneName(nextScene) << std::endl;
+		string nextSceneName = getSceneName(nextScene);
+
+		LOG_INFO << "Scene Change: " << getSceneName(this->scene) << " > " << nextSceneName << std::endl;
 		this->scene = nextScene;
 
-		// TODO: use websocket to update OBS scene
+		try {
+			string obsScene = this->sceneMap.at(nextScene);
+			sendMessage(obsScene);
+		}
+		catch (std::exception _) {
+			LOG_DEBUG << "No target scene defined in INI: " << nextSceneName << endl;
+		}
 	}
-
-	this->ticker = ticker;
 }
