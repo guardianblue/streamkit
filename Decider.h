@@ -1,7 +1,6 @@
 #pragma once
 
 using namespace std;
-using namespace boost;
 
 enum class Scene {
 	// Default state
@@ -29,7 +28,7 @@ private:
 
 public:
 	Decider();
-	void initSceneMap(property_tree::ptree& ptree);
+	void initSceneMap(boost::property_tree::ptree& ptree);
 	void updateTicker(string text);
 };
 

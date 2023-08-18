@@ -34,5 +34,6 @@
 
 #include "Logger.hpp"
 #include "Notifier.h"
+#include "Decider.h"
 
 #endif //PCH_H

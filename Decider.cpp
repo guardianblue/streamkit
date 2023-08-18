@@ -13,7 +13,7 @@ Decider::Decider()
 	this->song = "";
 }
 
-void Decider::initSceneMap(property_tree::ptree& ptree)
+void Decider::initSceneMap(boost::property_tree::ptree& ptree)
 {
 	this->sceneMap[Scene::TITLE] = ptree.get<string>("SCENE.title-screen");
 	this->sceneMap[Scene::CARD_IN] = ptree.get<string>("SCENE.card-in");
@@ -100,7 +100,7 @@ bool isDanSelection(string ticker)
 		ticker.compare("CLASS 5") == 0 ||
 		ticker.compare("CLASS 6") == 0 ||
 		ticker.compare("CLASS 7") == 0
-	) {
+		) {
 		return true;
 	}
 
@@ -178,18 +178,8 @@ void Decider::updateTicker(string ticker)
 		LOG_INFO << "Arena Stage start: " << this->song;
 	}
 	else if (this->scene == Scene::STAGE) {
-		int tickerLength = ticker.length();
-		int songLength = this->song.length();
-		
-		try {
-			string suffix = ticker.substr(this->song.length());
-
-			if (boost::ends_with(ticker, MUSIC_CLEAR_SUFFIX) || boost::ends_with(ticker, MUSIC_FAIL_SUFFIX)) {
-				nextScene = Scene::RESULT;
-			}
-		}
-		catch (...) {
-			LOG_ERROR << "Error deciding end of stage result";
+		if (boost::ends_with(ticker, MUSIC_CLEAR_SUFFIX) || boost::ends_with(ticker, MUSIC_FAIL_SUFFIX)) {
+			nextScene = Scene::RESULT;
 		}
 	}
 	else if (ticker.compare(this->ticker.append(MUSIC_CLEAR_SUFFIX)) == 0 || ticker.compare(this->ticker.append(MUSIC_FAIL_SUFFIX)) == 0)

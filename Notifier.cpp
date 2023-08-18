@@ -13,8 +13,7 @@ bool isConnected;
 unsigned int msgIndex = 0;
 unsigned int numRetry = 0;
 
-string lastSceneName;
-
+string lastSceneName = "";
 
 void handlePayload(json payload) {
 	switch ((int) payload["op"]) {
@@ -27,10 +26,8 @@ void handlePayload(json payload) {
 	}
 	case 2:
 		// Identified
-		LOG_INFO << "WS: Identified (retry: " << numRetry << ")" << endl;
-		if (numRetry > 0) {
-			sendMessage(lastSceneName);
-		}
+		LOG_INFO << "WS: Identified" << endl;
+		isConnected = true;
 		break;
 	default:
 		LOG_DEBUG << "WS: " << payload << endl;
@@ -52,7 +49,6 @@ void onMessage(connection_hdl, wsclient::message_ptr msg)
 void onConnectionOpen(connection_hdl hdl)
 {
 	conn = hdl;
-	isConnected = true;
 	LOG_INFO << "Connection opened" << endl;
 }
 
@@ -76,9 +72,9 @@ void wsClientGetConnection(string uri)
 
 void wsClientSetCommonProperties()
 {
-	c.set_access_channels(log::alevel::none);
-	c.clear_access_channels(log::alevel::frame_payload);
-	c.set_error_channels(log::elevel::rerror);
+	c.set_access_channels(websocketpp::log::alevel::none);
+	c.clear_access_channels(websocketpp::log::alevel::frame_payload);
+	c.set_error_channels(websocketpp::log::elevel::rerror);
 
 	c.set_message_handler(onMessage);
 	c.set_open_handler(onConnectionOpen);
@@ -133,30 +129,35 @@ void sendMessage(string sceneName)
 
 	if (isConnected)
 	{
-		if (sceneName.compare("") != 0)
-		{
-			LOG_DEBUG << "Sending scene change to OBS: " << sceneName << endl;
+		try {
+			if (sceneName.compare("") != 0)
+			{
+				LOG_DEBUG << "Sending scene change to OBS: " << sceneName << endl;
 
-			json js;
-			js["op"] = 6;
+				json js;
+				js["op"] = 6;
 
-			json jsreq;
-			jsreq["requestType"] = "SetCurrentProgramScene";
-			jsreq["requestId"] = std::to_string(++msgIndex);
+				json jsreq;
+				jsreq["requestType"] = "SetCurrentProgramScene";
+				jsreq["requestId"] = std::to_string(++msgIndex);
 
-			json jsreqdata;
-			jsreqdata["sceneName"] = sceneName;
+				json jsreqdata;
+				jsreqdata["sceneName"] = sceneName;
 
-			jsreq["requestData"] = jsreqdata;
-			js["d"] = jsreq;
+				jsreq["requestData"] = jsreqdata;
+				js["d"] = jsreq;
 
-			c.send(conn, js.dump(), frame::opcode::text);
+				c.send(conn, js.dump(), frame::opcode::text);
 
+			}
+		}
+		catch (std::exception const& e) {
+			LOG_ERROR << "Error sending scene change to OBS: " << e.what() << endl;
 		}
 	}
-	else {
-		wsRetryConnect();
-	}
+	//else {
+	//	wsRetryConnect();
+	//}
 }
 
 void wsInit(boost::property_tree::ptree& ptree) {
@@ -173,8 +174,8 @@ void wsConnect()
 	LOG_INFO << "Connecting to: " << serverUri << endl;
 
 	try {
-		wsClientSetCommonProperties();		
 		c.init_asio();
+		wsClientSetCommonProperties();
 		wsClientGetConnection(serverUri);
 	}
 	catch (websocketpp::exception const& e) {
@@ -182,16 +183,21 @@ void wsConnect()
 	}
 }
 
-void wsRetryConnect()
-{
-	LOG_INFO << "Reconnecting" << endl;
-	numRetry++;
-	c.reset();
-	try {
-		wsClientSetCommonProperties();
-		wsClientGetConnection(serverUri);
-	} 
-	catch (websocketpp::exception const& e) {
-		LOG_ERROR << e.what() << endl;
-	}
-}
+// Do not attempt to reconnection as websocketpp has an open issue
+// that memory would leak on every failed attemp.
+// 
+// https://github.com/zaphoyd/websocketpp/issues/754
+// 
+//void wsRetryConnect()
+//{
+//	LOG_INFO << "Reconnecting" << endl;
+//	numRetry++;
+//	try {
+//		c.reset();
+//		wsClientSetCommonProperties();
+//		wsClientGetConnection(serverUri);
+//	} 
+//	catch (websocketpp::exception const& e) {
+//		LOG_ERROR << e.what() << endl;
+//	}
+//}
