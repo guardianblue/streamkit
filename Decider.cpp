@@ -214,15 +214,9 @@ void Decider::updateTicker(string ticker)
 	if (nextScene != Scene::UNKNOWN && nextScene != this->scene) {
 		string nextSceneName = getSceneName(nextScene);
 
-		LOG_INFO << "Scene Change: " << getSceneName(this->scene) << " > " << nextSceneName << std::endl;
+		LOG_INFO << "Scene Change: " << nextSceneName << std::endl;
 		this->scene = nextScene;
 
-		try {
-			string obsScene = this->sceneMap.at(nextScene);
-			sendMessage(obsScene);
-		}
-		catch (std::exception _) {
-			LOG_DEBUG << "No target scene defined in INI: " << nextSceneName << endl;
-		}
+		sendMessage(this->sceneMap[nextScene]);
 	}
 }

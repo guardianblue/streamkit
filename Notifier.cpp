@@ -1,19 +1,52 @@
 #include "pch.h"
 #include "Notifier.h"
 
-
-using namespace std;
-using namespace websocketpp;
+using namespace CryptoPP;
 
 wsclient c;
-string serverUri;
+
+string serverUri = "ws://localhost:4455";
+string serverPassword = "";
+
 connection_hdl conn;
 bool isConnected;
 unsigned int msgIndex = 0;
+unsigned int numRetry = 0;
+
+string lastSceneName;
+
+
+void handlePayload(json payload) {
+	switch ((int) payload["op"]) {
+	case 0: {
+		// Hello
+		json authObj = payload["d"]["authentication"];
+		LOG_INFO << "WS: Hello (useAuth: " << !authObj.is_null() << ")" << endl;
+		identify(authObj);
+		break;
+	}
+	case 2:
+		// Identified
+		LOG_INFO << "WS: Identified (retry: " << numRetry << ")" << endl;
+		if (numRetry > 0) {
+			sendMessage(lastSceneName);
+		}
+		break;
+	default:
+		LOG_DEBUG << "WS: " << payload << endl;
+	}
+}
 
 void onMessage(connection_hdl, wsclient::message_ptr msg)
 {
-	LOG_INFO << "WS: " << msg->get_payload() << endl;
+	string payload = msg->get_payload();
+
+	try {
+		handlePayload(json::parse(payload));
+	}
+	catch (std::exception const& e) {
+		LOG_ERROR << "OBS Payload Parse Error: " << e.what() << endl;
+	}
 }
 
 void onConnectionOpen(connection_hdl hdl)
@@ -21,14 +54,12 @@ void onConnectionOpen(connection_hdl hdl)
 	conn = hdl;
 	isConnected = true;
 	LOG_INFO << "Connection opened" << endl;
-	identify();
 }
 
 void onConnectionClose(connection_hdl handle)
 {
 	isConnected = false;
 	LOG_INFO << "Connection closed" << endl;
-	wsRetryConnect();
 }
 
 void wsClientGetConnection(string uri)
@@ -45,23 +76,51 @@ void wsClientGetConnection(string uri)
 
 void wsClientSetCommonProperties()
 {
-	c.set_access_channels(log::alevel::all);
+	c.set_access_channels(log::alevel::none);
 	c.clear_access_channels(log::alevel::frame_payload);
-	c.set_error_channels(log::elevel::all);
+	c.set_error_channels(log::elevel::rerror);
 
 	c.set_message_handler(onMessage);
 	c.set_open_handler(onConnectionOpen);
 	c.set_close_handler(onConnectionClose);
 }
 
-void identify()
+string sha256base64(string ciper)
 {
-	nlohmann::json jmain;
+	string digest;
+	SHA256 hash;
+
+	StringSource ss(ciper, true,
+		new HashFilter(hash,
+			new Base64Encoder(
+				new StringSink(digest), 
+				false /* do not insert line break */
+			)
+		)
+	);
+
+	return digest;
+}
+
+string getAuthDigest(string salt, string challenge)
+{
+	string secret = sha256base64(serverPassword + salt);
+	string authDigest = sha256base64(secret + challenge);
+
+	return authDigest;
+}
+
+void identify(json authObj)
+{
+	json jmain;
 	jmain["op"] = 1;
 
-	nlohmann::json j;
+	json j;
 	j["rpcVersion"] = 1;
-	// todo implement auth
+
+	if (!authObj.is_null()) {
+		j["authentication"] = getAuthDigest(authObj["salt"], authObj["challenge"]);
+	}
 
 	jmain["d"] = j;
 
@@ -70,35 +129,48 @@ void identify()
 
 void sendMessage(string sceneName)
 {
+	lastSceneName = sceneName;
+
 	if (isConnected)
 	{
 		if (sceneName.compare("") != 0)
 		{
 			LOG_DEBUG << "Sending scene change to OBS: " << sceneName << endl;
 
-			nlohmann::json js;
+			json js;
 			js["op"] = 6;
 
-			nlohmann::json jsreq;
+			json jsreq;
 			jsreq["requestType"] = "SetCurrentProgramScene";
 			jsreq["requestId"] = std::to_string(++msgIndex);
 
-			nlohmann::json jsreqdata;
+			json jsreqdata;
 			jsreqdata["sceneName"] = sceneName;
 
 			jsreq["requestData"] = jsreqdata;
 			js["d"] = jsreq;
 
 			c.send(conn, js.dump(), frame::opcode::text);
+
 		}
+	}
+	else {
+		wsRetryConnect();
 	}
 }
 
-void wsConnect(string uri)
-{
-	LOG_INFO << "Connecting to: " << uri << endl;
+void wsInit(boost::property_tree::ptree& ptree) {
+	string ptreeServerUri = ptree.get<string>("MAIN.server");
+	if (ptreeServerUri.compare("") != 0) {
+		serverUri = ptreeServerUri;
+	}
 
-	serverUri = uri;
+	serverPassword = ptree.get<string>("MAIN.password");
+}
+
+void wsConnect()
+{
+	LOG_INFO << "Connecting to: " << serverUri << endl;
 
 	try {
 		wsClientSetCommonProperties();		
@@ -113,6 +185,7 @@ void wsConnect(string uri)
 void wsRetryConnect()
 {
 	LOG_INFO << "Reconnecting" << endl;
+	numRetry++;
 	c.reset();
 	try {
 		wsClientSetCommonProperties();

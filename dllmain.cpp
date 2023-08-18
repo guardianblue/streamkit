@@ -603,13 +603,14 @@ DWORD WINAPI Initialize(LPVOID hModule)
     try {
         boost::property_tree::ini_parser::read_ini(pathStr, ptree);
         decider.initSceneMap(ptree);
+        wsInit(ptree);
     }
-    catch (std::exception& e) {
+    catch (std::exception const& e) {
         LOG_ERROR << "Cannot load INI file: " << e.what() << endl;
     }
 
     // Initialize WebSocket
-    wsConnect("ws://localhost:4455");
+    wsConnect();
 
     return EXIT_SUCCESS;
 }
