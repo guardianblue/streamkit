@@ -22,7 +22,6 @@ class Decider
 private:
 	string ticker;
 	string song;
-	bool isArena;
 	Scene scene;
 	map<Scene, string> sceneMap;
 

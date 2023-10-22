@@ -136,20 +136,24 @@ void Decider::updateTicker(string ticker)
 	}
 	else if (ticker.compare("ENTRY") == 0) {
 		nextScene = Scene::CARD_IN;
-		this->isArena = false;
 	}
 	else if (ticker.compare("MODE?") == 0) {
 		nextScene = Scene::MODE_SELECT;
 	}
 	else if (ticker.compare("ARENA MATCHING") == 0) {
 		nextScene = Scene::ARENA_LOBBY;
-		this->isArena = true;
 	}
 	else if (ticker.compare("ARENA READY") == 0) {
 		nextScene = Scene::ARENA_BEFORE_SONG;
 	}
 	else if (ticker.compare("ARENA RESULT") == 0) {
 		nextScene = Scene::ARENA_PODIUM;
+	}
+	else if (ticker.compare("BPL BATTLE READY") == 0) {
+		nextScene = Scene::BPL_BEFORE_SONG;
+	}
+	else if (ticker.compare("BPL BATTLE RESULT") == 0) {
+		nextScene = Scene::BPL_PODIUM;
 	}
 	else if (ticker.compare("MUSIC SELECT!!") == 0) {
 		// Music select
@@ -164,18 +168,18 @@ void Decider::updateTicker(string ticker)
 	else if (ticker.compare("SUCCESS") == 0 || ticker.compare("UNSUCCESS") == 0) {
 		nextScene = Scene::DAN_RESULT;
 	}
-	else if (!this->isArena && this->scene == Scene::MUSIC_SELECT) {
+	else if (this->scene == Scene::ARENA_BEFORE_SONG || this->scene == Scene::BPL_BEFORE_SONG) {
+		this->song = ticker;
+		nextScene = Scene::STAGE;
+		LOG_INFO << "Arena/BPL Stage start: " << this->song;
+	}
+	else if (this->scene == Scene::MUSIC_SELECT) {
 		if (ticker.compare(this->ticker) == 0) {
 			// Ticker will send the same song name when a song is decided
 			this->song = ticker;
 			nextScene = Scene::STAGE;
 			LOG_INFO << "Stage start: " << this->song;
 		}
-	}
-	else if (this->isArena && this->scene == Scene::ARENA_BEFORE_SONG) {
-		this->song = ticker;
-		nextScene = Scene::STAGE;
-		LOG_INFO << "Arena Stage start: " << this->song;
 	}
 	else if (this->scene == Scene::STAGE) {
 		if (boost::ends_with(ticker, MUSIC_CLEAR_SUFFIX) || boost::ends_with(ticker, MUSIC_FAIL_SUFFIX)) {
